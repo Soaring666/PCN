@@ -8,6 +8,7 @@ import torch
 import torch.utils.data as data
 import numpy as np
 import open3d as o3d
+from tqdm import tqdm
 
 
 class ShapeNet(data.Dataset):
@@ -82,6 +83,7 @@ class ShapeNet(data.Dataset):
         partial_paths, complete_paths = list(), list()
 
         for line in lines:
+            #获取相应数据的路径
             category, model_id = line.split('/')
             if self.split == 'train':
                 partial_paths.append(os.path.join(self.dataroot, self.split, 'partial', category, model_id + '_{}.ply'))
@@ -100,3 +102,12 @@ class ShapeNet(data.Dataset):
         if idx.shape[0] < n:
             idx = np.concatenate([idx, np.random.randint(pc.shape[0], size=n-pc.shape[0])])
         return pc[idx[:n]]
+
+if __name__ == '__main__':
+    path = os.getcwd()
+    dataset_path = os.path.join(path, 'PCN')
+    dataset = ShapeNet(dataset_path, 'test', 'boat')
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=16)
+    for partial, completion in tqdm(dataloader):
+        print('partial_shape is :', partial.shape)
+        print('completion_shape is :', completion.shape)
